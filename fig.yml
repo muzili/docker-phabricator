@@ -1,19 +1,19 @@
 mysql:
   image: muzili/mariadb:latest
   volumes:
-    - /home/data/mariadb/data:/data
-    - /home/data/mariadb/log:/var/log/mysql
+    - /home/joshua/code/docker/data/mariadb/data:/data
+    - /home/joshua/code/docker/data/mariadb/log:/var/log/mysql
 
 phabricator:
   image: muzili/phabricator:latest
   links:
    - mysql:mysql
   environment:
-    VIRTUAL_HOST: phab.localdomain.com
+    VIRTUAL_HOST: phab.example.com
   volumes:
-    - /home/data/phabricator/data:/srv/www/phabricator
-    - /home/data/phabricator/git:/srv/git
-    - /home/data/phabricator/log:/var/log
+    - /home/joshua/code/docker/data/phabricator/data:/srv/www/phabricator
+    - /home/joshua/code/docker/data/phabricator/git:/srv/git
+    - /home/joshua/code/docker/data/phabricator/log:/var/log
 
 nginxproxy:
   image: jwilder/nginx-proxy

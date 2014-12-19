@@ -6,21 +6,21 @@ pre_start_action() {
   
   if [ ! -d libphutil ]; then
     echo "Cloning libphutil..."
-    git clone https://github.com/facebook/libphutil.git
+    git clone https://github.com/phacility/libphutil.git
   else
     echo "The directory of libphutil is not empty. Left as is."
   fi
 
   if [ ! -d arcanist ]; then
     echo "Cloning Arcanist..."
-    git clone https://github.com/facebook/arcanist.git
+    git clone https://github.com/phacility/arcanist.git
   else
     echo "The directory of Arcanist is not empty. Left as is."
   fi
 
   if [ ! -d phabricator ]; then
     echo "Cloning Phabricator..."
-    git clone https://github.com/facebook/phabricator.git
+    git clone https://github.com/phacility/phabricator.git
   else
     echo "The directory of Phabricator is not empty. Left as is."
   fi
