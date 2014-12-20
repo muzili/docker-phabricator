@@ -28,6 +28,23 @@ pre_start_action() {
 
   cd phabricator
   echo "mysql: $MYSQL_ENV_USER:$MYSQL_ENV_PASS@$MYSQL_PORT_3306_TCP_ADDR:$MYSQL_PORT_3306_TCP_PORT"
+  RET=1
+  TIMEOUT=0
+  while [[ RET -ne 0 ]]; do
+      echo "=> Waiting for confirmation of MariaDB service startup"
+      sleep 5
+      ((TIMEOUT+=5))
+      if [[ $TIMEOUT -gt 60 ]]; then
+          echo "Failed to connect mariadb"
+          exit 1
+      fi
+      mysql -u$MYSQL_ENV_USER -p$MYSQL_ENV_PASS \
+            -h$MYSQL_PORT_3306_TCP_ADDR \
+            -P$MYSQL_PORT_3306_TCP_PORT \
+            -e "status" > /dev/null 2>&1
+      RET=$?
+  done
+
   bin/config set mysql.host $MYSQL_PORT_3306_TCP_ADDR
   bin/config set mysql.port $MYSQL_PORT_3306_TCP_PORT
   bin/config set mysql.user $MYSQL_ENV_USER
