@@ -3,7 +3,7 @@ pre_start_action() {
   mkdir -p "$LOG_DIR/nginx"
 
   cd $DATA_DIR
-  
+
   if [ ! -d libphutil ]; then
     echo "Cloning libphutil..."
     git clone https://github.com/phacility/libphutil.git
@@ -32,6 +32,19 @@ pre_start_action() {
   bin/config set mysql.pass $MYSQL_ENV_PASS
   bin/storage upgrade --force
   bin/phd start
+
+  mkdir -p /etc/supervisor/conf.d
+  cat > /etc/supervisor/conf.d/supervisord.conf <<-EOF
+[supervisord]
+nodaemon=true
+
+[program:php5-fpm]
+command=/usr/sbin/php5-fpm --nodaemonize
+
+[program:nginx]
+command=/usr/sbin/nginx
+
+EOF
 
   chown -R nginx:nginx $DATA_DIR
   chown -R nginx:nginx "$LOG_DIR/nginx"

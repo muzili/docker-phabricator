@@ -16,8 +16,4 @@ fi
 pre_start_action
 post_start_action
 
-echo "Starting PHP-FPM..."
-service php-fpm start
-
-echo "Starting Nginx..."
-/usr/sbin/nginx
+exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
