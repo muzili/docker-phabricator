@@ -1,6 +1,7 @@
 pre_start_action() {
   mkdir -p $DATA_DIR
-  mkdir -p "$LOG_DIR/nginx"
+  mkdir -p $LOG_DIR/nginx
+  mkdir -p $LOG_DIR/php-fpm
 
   cd $DATA_DIR
 
@@ -39,7 +40,7 @@ pre_start_action() {
 nodaemon=true
 
 [program:php5-fpm]
-command=/usr/sbin/php5-fpm --nodaemonize
+command=/usr/sbin/php-fpm --nodaemonize
 
 [program:nginx]
 command=/usr/sbin/nginx
@@ -48,8 +49,6 @@ EOF
 
   chown -R nginx:nginx $DATA_DIR
   chown -R nginx:nginx "$LOG_DIR/nginx"
-
-  mkdir -p /var/log/php-fpm
 }
 
 post_start_action() {
