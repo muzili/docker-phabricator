@@ -27,6 +27,7 @@ pre_start_action() {
   fi
 
   cd phabricator
+  echo "mysql: $MYSQL_ENV_USER:$MYSQL_ENV_PASS@$MYSQL_PORT_3306_TCP_ADDR:$MYSQL_PORT_3306_TCP_PORT"
   bin/config set mysql.host $MYSQL_PORT_3306_TCP_ADDR
   bin/config set mysql.port $MYSQL_PORT_3306_TCP_PORT
   bin/config set mysql.user $MYSQL_ENV_USER

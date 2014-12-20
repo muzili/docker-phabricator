@@ -3,6 +3,9 @@ mysql:
   volumes:
     - ./data/mariadb/data:/data
     - ./data/mariadb/log:/var/log/mysql
+  environment:
+    USER: admin
+    PASS: 41aRr.gJCtdk
 
 phabricator:
   image: muzili/phabricator:latest
