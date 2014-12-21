@@ -3,10 +3,9 @@ FROM muzili/centos-php
 MAINTAINER Joshua Lee <muzili@gmail.com>
 
 # Install git to download Phabricator.
-RUN yum -y install git
-
-# Clean up YUM when done.
-RUN yum clean all
+RUN yum -y install git mysql pcre-devel php-pear && \
+    pecl install apc && \
+    yum clean all
 
 # Download Phabricator bundle.
 RUN mkdir -p /srv/www/phabricator
@@ -24,6 +23,9 @@ RUN touch /first_run
 
 # Expose our web root and log directories log.
 VOLUME ["/srv/www/phabricator", "/srv/git", "/var/log"]
+
+# Expose the port
+EXPOSE 80 443
 
 # Kicking in
 CMD ["/scripts/start.sh"]

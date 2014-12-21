@@ -33,22 +33,32 @@ pre_start_action() {
   while [[ RET -ne 0 ]]; do
       echo "=> Waiting for confirmation of MariaDB service startup"
       sleep 5
+      echo "Add 5 seconds to timeout"
       ((TIMEOUT+=5))
+      echo "check current timeout value:$TIMEOUT"
       if [[ $TIMEOUT -gt 60 ]]; then
           echo "Failed to connect mariadb"
           exit 1
       fi
+      echo "check mysql status"
       mysql -u$MYSQL_ENV_USER -p$MYSQL_ENV_PASS \
             -h$MYSQL_PORT_3306_TCP_ADDR \
             -P$MYSQL_PORT_3306_TCP_PORT \
-            -e "status" > /dev/null 2>&1
+            -e "status"
       RET=$?
+      echo "mysql status is $RET"
   done
+
+  echo "Connected mariadb"
 
   bin/config set mysql.host $MYSQL_PORT_3306_TCP_ADDR
   bin/config set mysql.port $MYSQL_PORT_3306_TCP_PORT
   bin/config set mysql.user $MYSQL_ENV_USER
   bin/config set mysql.pass $MYSQL_ENV_PASS
+
+  # Set the base url to virtual host
+  bin/config set phabricator.base-uri "http://$VIRTUAL_HOST/"
+  sed -i -e"s/phabricator.local/$VIRTUAL_HOST/g" /etc/nginx/sites-available/phabricator.conf
   bin/storage upgrade --force
   bin/phd start
 

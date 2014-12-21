@@ -2,7 +2,7 @@
 # Starts up the Phabricator stack within the container.
 
 # Stop on error
-set -e
+#set -e
 
 DATA_DIR=/srv/www/phabricator
 LOG_DIR=/var/log
