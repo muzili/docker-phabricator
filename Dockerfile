@@ -3,7 +3,8 @@ FROM muzili/centos-php
 MAINTAINER Joshua Lee <muzili@gmail.com>
 
 # Install git to download Phabricator.
-RUN yum -y install git mysql pcre-devel php-pear && \
+RUN yum -y install git mysql pcre-devel php-pear \
+    openssh-server cronie sudo && \
     pecl install apc && \
     yum clean all
 
@@ -18,11 +19,11 @@ ADD etc/phabricator.conf /etc/nginx/sites-available/phabricator.conf
 RUN ln -s /etc/nginx/sites-available/phabricator.conf /etc/nginx/sites-enabled
 
 ADD scripts /scripts
-RUN chmod +x /scripts/start.sh
+RUN chmod +x /scripts/*.sh
 RUN touch /first_run
 
 # Expose our web root and log directories log.
-VOLUME ["/srv/www/phabricator", "/srv/git", "/var/log"]
+VOLUME ["/srv/www/phabricator", "/srv/git", "/var/log", "/var/repo"]
 
 # Expose the port
 EXPOSE 80 443

@@ -6,6 +6,7 @@
 
 DATA_DIR=/srv/www/phabricator
 LOG_DIR=/var/log
+REPO_DIR=/var/repo
 
 if [[ -e /first_run ]]; then
   source /scripts/first_run.sh

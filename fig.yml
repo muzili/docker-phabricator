@@ -17,6 +17,7 @@ phabricator:
     - ./data/phabricator/data:/srv/www/phabricator
     - ./data/phabricator/git:/srv/git
     - ./data/phabricator/log:/var/log
+    - ./data/phabricator/repo:/var/repo
 
 nginxproxy:
   image: jwilder/nginx-proxy

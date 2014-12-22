@@ -2,7 +2,65 @@ pre_start_action() {
   mkdir -p $DATA_DIR
   mkdir -p $LOG_DIR/nginx
   mkdir -p $LOG_DIR/php-fpm
+  mkdir -p $LOG_DIR/supervisor
+  mkdir -p $REPO_DIR
 
+  # Add users
+  echo "git:x:2000:2000:user for phabricator ssh:/srv/www/phabricator/phabricator:/bin/bash" >> /etc/passwd
+  echo "phab-daemon:x:2001:2000:user for phabricator daemons:/srv/www/phabricator/phabricator:/bin/bash" >> /etc/passwd
+  echo "wwwgrp-phabricator:!:2000:nginx" >> /etc/group
+  echo "git ALL=(phab-daemon) SETENV: NOPASSWD: /usr/bin/git-upload-pack, /usr/bin/git-receive-pack" > /etc/sudoers.d/git
+  echo "git ALL=(phab-daemon) SETENV: NOPASSWD: /usr/bin/git-http-backend, /usr/bin/hg" >/etc/sudoers.d/www
+  echo "nginx ALL=(phab-daemon) SETENV: NOPASSWD: /usr/bin/git-http-backend, /usr/bin/hg" >>/etc/sudoers.d/www
+  ln -sf /usr/libexec/git-core/git-http-backend /usr/bin/git-http-backend
+
+  mkdir -p /etc/phabricator-ssh
+  cat > /etc/phabricator-ssh/sshd_config <<EOF
+  AuthorizedKeysCommand /scripts/phabricator-ssh-hook.sh
+  AuthorizedKeysCommandUser git
+  AllowUsers git
+
+  # You may need to tweak these options, but mostly they just turn off everything
+  # dangerous.
+
+  Port 22
+  Protocol 2
+  PermitRootLogin no
+  AllowAgentForwarding no
+  AllowTcpForwarding no
+  PrintMotd no
+  PrintLastLog no
+  PasswordAuthentication no
+  AuthorizedKeysFile none
+
+  PidFile /run/sshd-phabricator.pid
+
+EOF
+  chown root:root /etc/phabricator-ssh/
+
+#  mkdir -p /run/php-fpm
+#  chown git:wwwgrp-phabricator /run/php-fpm
+  cat > /etc/php-fpm.conf <<EOF
+[global]
+pid = /run/php-fpm/php-fpm.pid
+error_log = /var/log/php-fpm/error.log
+daemonize = no
+[www]
+user = git
+group = wwwgrp-phabricator
+listen = /var/run/php-fpm/www.sock
+listen.owner = git
+listen.group = wwwgrp-phabricator
+listen.mode = 0666
+pm = dynamic
+pm.max_children = 4
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 4
+catch_workers_output = yes
+php_admin_value[error_log] = /var/log/php-fpm/phabricator.php.log
+
+EOF
   cd $DATA_DIR
 
   if [ ! -d libphutil ]; then
@@ -25,6 +83,9 @@ pre_start_action() {
   else
     echo "The directory of Phabricator is not empty. Left as is."
   fi
+
+  # Set up the Phabricator code base
+  chown git:wwwgrp-phabricator $DATA_DIR
 
   cd phabricator
   echo "mysql: $MYSQL_ENV_USER:$MYSQL_ENV_PASS@$MYSQL_PORT_3306_TCP_ADDR:$MYSQL_PORT_3306_TCP_PORT"
@@ -58,9 +119,12 @@ pre_start_action() {
 
   # Set the base url to virtual host
   bin/config set phabricator.base-uri "http://$VIRTUAL_HOST/"
+  bin/config set phd.user phab-daemon
+  bin/config set diffusion.ssh-user git
+  bin/config set diffusion.allow-http-auth true
+
   sed -i -e"s/phabricator.local/$VIRTUAL_HOST/g" /etc/nginx/sites-available/phabricator.conf
   bin/storage upgrade --force
-  bin/phd start
 
   mkdir -p /etc/supervisor/conf.d
   cat > /etc/supervisor/conf.d/supervisord.conf <<-EOF
@@ -73,9 +137,57 @@ command=/usr/sbin/php-fpm --nodaemonize
 [program:nginx]
 command=/usr/sbin/nginx
 
+[program:PhabricatorRepositoryPullLocalDaemon]
+user=phab-daemon
+command=/srv/www/phabricator/phabricator/scripts/daemon/phd-daemon PhabricatorRepositoryPullLocalDaemon --phd=/var/tmp/phd/pid
+stdout_logfile=/var/log/supervisor/PhabricatorRepositoryPullLocalDaemon.log
+stderr_logfile=/var/log/supervisor/PhabricatorRepositoryPullLocalDaemon_err.log
+
+[program:PhabricatorGarbageCollectorDaemon]
+user=phab-daemon
+command=/srv/www/phabricator/phabricator/scripts/daemon/phd-daemon PhabricatorGarbageCollectorDaemon --phd=/var/tmp/phd/pid
+stdout_logfile=/var/log/supervisor/PhabricatorGarbageCollectorDaemon.log
+stderr_logfile=/var/log/supervisor/PhabricatorGarbageCollectorDaemon_err.log
+
+[program:PhabricatorTaskmasterDaemon1]
+user=phab-daemon
+command=/srv/www/phabricator/phabricator/scripts/daemon/phd-daemon PhabricatorTaskmasterDaemon --phd=/var/tmp/phd/pid
+stdout_logfile=/var/log/supervisor/PhabricatorTaskmasterDaemon1.log
+stderr_logfile=/var/log/supervisor/PhabricatorTaskmasterDaemon1_err.log
+
+[program:PhabricatorTaskmasterDaemon2]
+user=phab-daemon
+command=/srv/www/phabricator/phabricator/scripts/daemon/phd-daemon PhabricatorTaskmasterDaemon --phd=/var/tmp/phd/pid
+stdout_logfile=/var/log/supervisor/PhabricatorTaskmasterDaemon2.log
+stderr_logfile=/var/log/supervisor/PhabricatorTaskmasterDaemon2_err.log
+
+[program:PhabricatorTaskmasterDaemon3]
+user=phab-daemon
+command=/srv/www/phabricator/phabricator/scripts/daemon/phd-daemon PhabricatorTaskmasterDaemon --phd=/var/tmp/phd/pid
+stdout_logfile=/var/log/supervisor/PhabricatorTaskmasterDaemon3.log
+stderr_logfile=/var/log/supervisor/PhabricatorTaskmasterDaemon3_err.log
+
+[program:PhabricatorTaskmasterDaemon4]
+user=phab-daemon
+command=/srv/www/phabricator/phabricator/scripts/daemon/phd-daemon PhabricatorTaskmasterDaemon --phd=/var/tmp/phd/pid
+stdout_logfile=/var/log/supervisor/PhabricatorTaskmasterDaemon4.log
+stderr_logfile=/var/log/supervisor/PhabricatorTaskmasterDaemon4_err.log
+
+[group:phd]
+programs=PhabricatorRepositoryPullLocalDaemon,PhabricatorGarbageCollectorDaemon,PhabricatorTaskmasterDaemon1,PhabricatorTaskmasterDaemon2,PhabricatorTaskmasterDaemon3,PhabricatorTaskmasterDaemon4
+
+[program:cron]
+command=crond -n
+
+[program:phab-sshd]
+command=/usr/sbin/sshd -D -f /etc/phabricator-ssh/sshd_config
+
 EOF
 
-  chown -R nginx:nginx $DATA_DIR
+  mkdir -p /var/tmp/phd/pid
+  chmod 0777 /var/tmp/phd/pid
+  chown -R phab-daemon:2000 $REPO_DIR
+  chown -R git:wwwgrp-phabricator $DATA_DIR
   chown -R nginx:nginx "$LOG_DIR/nginx"
 }
 
