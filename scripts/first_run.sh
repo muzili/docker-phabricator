@@ -24,7 +24,7 @@ pre_start_action() {
   # You may need to tweak these options, but mostly they just turn off everything
   # dangerous.
 
-  Port 22
+  Port 10022
   Protocol 2
   PermitRootLogin no
   AllowAgentForwarding no
@@ -112,7 +112,6 @@ EOF
   done
 
   echo "Connected mariadb"
-
   bin/config set mysql.host $MYSQL_PORT_3306_TCP_ADDR
   bin/config set mysql.port $MYSQL_PORT_3306_TCP_PORT
   bin/config set mysql.user $MYSQL_ENV_USER
@@ -122,6 +121,7 @@ EOF
   bin/config set phabricator.base-uri "http://$VIRTUAL_HOST/"
   bin/config set phd.user phab-daemon
   bin/config set diffusion.ssh-user git
+  bin/config set diffusion.ssh-port 10022
   bin/config set diffusion.allow-http-auth true
 
   # Set the auth option

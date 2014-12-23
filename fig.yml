@@ -9,8 +9,10 @@ mysql:
 
 phabricator:
   image: muzili/phabricator:latest
+  ports:
+    - "10022:10022"
   links:
-   - mysql:mysql
+    - mysql:mysql
   environment:
     VIRTUAL_HOST: phab.example.com
     SMTP_HOST: smtp-host

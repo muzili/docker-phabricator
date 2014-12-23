@@ -4,7 +4,7 @@
 VCSUSER="git"
 
 # NOTE: Replace this with the path to your Phabricator directory.
-ROOT="/srv/www/phabricator/phabricator/phabricator"
+ROOT="/srv/www/phabricator/phabricator"
 
 if [ "$1" != "$VCSUSER" ];
 then
