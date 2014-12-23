@@ -12,6 +12,7 @@ pre_start_action() {
   echo "git ALL=(phab-daemon) SETENV: NOPASSWD: /usr/bin/git-upload-pack, /usr/bin/git-receive-pack" > /etc/sudoers.d/git
   echo "git ALL=(phab-daemon) SETENV: NOPASSWD: /usr/bin/git-http-backend, /usr/bin/hg" >/etc/sudoers.d/www
   echo "nginx ALL=(phab-daemon) SETENV: NOPASSWD: /usr/bin/git-http-backend, /usr/bin/hg" >>/etc/sudoers.d/www
+  sed -i -e's/\(Defaults \+requiretty\)/#\1/g' /etc/sudoers
   ln -sf /usr/libexec/git-core/git-http-backend /usr/bin/git-http-backend
 
   mkdir -p /etc/phabricator-ssh
