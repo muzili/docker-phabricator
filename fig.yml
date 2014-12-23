@@ -13,6 +13,10 @@ phabricator:
    - mysql:mysql
   environment:
     VIRTUAL_HOST: phab.example.com
+    SMTP_HOST: smtp-host
+    SMTP_PORT: smtp-port
+    SMTP_USER: smtp-user
+    SMTP_PASS: smtp-pass
   volumes:
     - ./data/phabricator/data:/srv/www/phabricator
     - ./data/phabricator/git:/srv/git

@@ -124,7 +124,22 @@ EOF
   bin/config set diffusion.ssh-user git
   bin/config set diffusion.allow-http-auth true
 
+  # Set the auth option
+  bin/config set auth.require-email-verification true
+  
+  # Set the smtp host
+  if [[ ! -z "$SMTP_HOST" ]]; then
+      bin/config set metamta.mail-adapter "PhabricatorMailImplementationPHPMailerAdapter"
+      bin/config set phpmailer.mailer "smtp"
+      bin/config set phpmailer.smtp-host "$SMTP_HOST"
+      bin/config set phpmailer.smtp-port $SMTP_PORT
+      bin/config set phpmailer.smtp-user "$SMTP_USER"
+      bin/config set phpmailer.smtp-password "$SMTP_PASS"
+      bin/config set phpmailer.smtp-protocol "tls"
+  fi
+  
   sed -i -e"s/phabricator.local/$VIRTUAL_HOST/g" /etc/nginx/sites-available/phabricator.conf
+  bin/config set storage.upload-size-limit 100M
   bin/storage upgrade --force
 
   mkdir -p /etc/supervisor/conf.d
