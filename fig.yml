@@ -19,6 +19,7 @@ phabricator:
     SMTP_PORT: smtp-port
     SMTP_USER: smtp-user
     SMTP_PASS: smtp-pass
+    PERMIT_DOMAINS: '["example.com","mail.example.com"]'
   volumes:
     - ./data/phabricator/data:/srv/www/phabricator
     - ./data/phabricator/git:/srv/git
