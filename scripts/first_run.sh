@@ -126,7 +126,10 @@ EOF
 
   # Set the auth option
   bin/config set auth.require-email-verification true
-  
+  if [[ ! -z "$PERMIT_DOMAINS" ]]; then
+      bin/config set auth.email-domains "$PERMIT_DOMAINS"
+  fi
+
   # Set the smtp host
   if [[ ! -z "$SMTP_HOST" ]]; then
       bin/config set metamta.mail-adapter "PhabricatorMailImplementationPHPMailerAdapter"
@@ -137,7 +140,8 @@ EOF
       bin/config set phpmailer.smtp-password "$SMTP_PASS"
       bin/config set phpmailer.smtp-protocol "tls"
   fi
-  
+
+  bin/config set phabricator.timezone "Asia/Shanghai"
   sed -i -e"s/phabricator.local/$VIRTUAL_HOST/g" /etc/nginx/sites-available/phabricator.conf
   bin/config set storage.upload-size-limit 100M
   bin/storage upgrade --force
