@@ -18,8 +18,8 @@ RUN rm -rf /etc/nginx/sites-enabled/default.conf
 ADD etc/phabricator.conf /etc/nginx/sites-available/phabricator.conf
 RUN ln -s /etc/nginx/sites-available/phabricator.conf /etc/nginx/sites-enabled
 
-ADD scripts /scripts && \
-    my.cnf.d/ /etc/my.cnf.d/
+ADD scripts /scripts
+ADD my.cnf.d/ /etc/my.cnf.d/
 RUN chmod +x /scripts/*.sh && \
     chmod 644 /etc/my.cnf.d/*.cnf && \
     touch /first_run
