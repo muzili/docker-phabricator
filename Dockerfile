@@ -19,9 +19,9 @@ ADD etc/phabricator.conf /etc/nginx/sites-available/phabricator.conf
 RUN ln -s /etc/nginx/sites-available/phabricator.conf /etc/nginx/sites-enabled
 
 ADD scripts /scripts && \
-    mysql/ /etc/mysql/conf.d/
+    my.cnf.d/ /etc/my.cnf.d/
 RUN chmod +x /scripts/*.sh && \
-    chmod 644 /etc/mysql/conf.d/*.cnf && \
+    chmod 644 /etc/my.cnf.d/*.cnf && \
     touch /first_run
 
 # Expose our web root and log directories log.
