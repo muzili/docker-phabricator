@@ -18,9 +18,11 @@ RUN rm -rf /etc/nginx/sites-enabled/default.conf
 ADD etc/phabricator.conf /etc/nginx/sites-available/phabricator.conf
 RUN ln -s /etc/nginx/sites-available/phabricator.conf /etc/nginx/sites-enabled
 
-ADD scripts /scripts
-RUN chmod +x /scripts/*.sh
-RUN touch /first_run
+ADD scripts /scripts && \
+    mysql/ /etc/mysql/conf.d/
+RUN chmod +x /scripts/*.sh && \
+    chmod 644 /etc/mysql/conf.d/*.cnf && \
+    touch /first_run
 
 # Expose our web root and log directories log.
 VOLUME ["/srv/www/phabricator", "/srv/git", "/var/log", "/var/repo"]
