@@ -125,9 +125,9 @@ EOF
   bin/config set diffusion.allow-http-auth true
 
   # Set the auth option
-  bin/config set auth.require-email-verification true
   if [[ ! -z "$PERMIT_DOMAINS" ]]; then
       bin/config set auth.email-domains "$PERMIT_DOMAINS"
+      bin/config set auth.require-email-verification true
   fi
 
   # Set the smtp host
@@ -138,7 +138,13 @@ EOF
       bin/config set phpmailer.smtp-port $SMTP_PORT
       bin/config set phpmailer.smtp-user "$SMTP_USER"
       bin/config set phpmailer.smtp-password "$SMTP_PASS"
-      bin/config set phpmailer.smtp-protocol "tls"
+      if [[ ! -z "$SMTP_PROTO" ]]; then
+          bin/config set phpmailer.smtp-protocol "$SMTP_PROTO"
+      fi
+  fi
+  if [[ ! -z "$MTA_DOMAIN" ]]; then
+      bin/config set metamta.domain "MTA_DOMAIN"
+      bin/config set metamta.default-address "noreply@$MTA_DOMAIN"
   fi
 
   bin/config set phabricator.timezone "Asia/Shanghai"
