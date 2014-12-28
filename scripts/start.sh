@@ -17,4 +17,4 @@ fi
 pre_start_action
 post_start_action
 
-exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
+exec supervisord
