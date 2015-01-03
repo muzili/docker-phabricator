@@ -125,9 +125,6 @@ port $SMTP_PORT
 user $SMTP_USER
 password $SMTP_PASS
 auth login
-auto_from off
-from no-reply@$MTA_DOMAIN
-maildomain $MTA_DOMAIN
 tls on
 tls_trust_file /etc/pki/tls/certs/ca-bundle.crt
 
