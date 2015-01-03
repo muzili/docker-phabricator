@@ -60,7 +60,7 @@ pm.min_spare_servers = 1
 pm.max_spare_servers = 4
 catch_workers_output = yes
 php_admin_value[error_log] = /var/log/php-fpm/phabricator.php.log
-
+php_admin_value[sendmail_path] = /usr/bin/msmtp -t -C /etc/msmtprc
 EOF
   cd $DATA_DIR
 
@@ -111,6 +111,31 @@ EOF
       echo "mysql status is $RET"
   done
 
+  touch /etc/msmtprc
+  mkdir -p $LOG_DIR/msmtp
+  chown phab-daemon:wwwgrp-phabricator $LOG_DIR/msmtp
+  cat > /etc/msmtprc <<EOF
+# The SMTP server of the provider.
+defaults
+logfile $LOG_DIR/msmtplog
+
+account mail
+host SMTP_HOST
+port SMTP_PORT
+user SMTP_USER
+password SMTP_PORT
+auth login
+auto_from off
+from no-reply@moretv.com.cn
+maildomain moretv.com.cn
+tls on
+tls_trust_file /etc/pki/tls/certs/ca-bundle.crt
+
+account default : mail
+
+EOF
+  chmod 600 /etc/msmtprc
+
   echo "Connected mariadb"
   bin/config set mysql.host $MYSQL_PORT_3306_TCP_ADDR
   bin/config set mysql.port $MYSQL_PORT_3306_TCP_PORT
@@ -131,17 +156,20 @@ EOF
   fi
 
   # Set the smtp host
-  if [[ ! -z "$SMTP_HOST" ]]; then
-      bin/config set metamta.mail-adapter "PhabricatorMailImplementationPHPMailerAdapter"
-      bin/config set phpmailer.mailer "smtp"
-      bin/config set phpmailer.smtp-host "$SMTP_HOST"
-      bin/config set phpmailer.smtp-port $SMTP_PORT
-      bin/config set phpmailer.smtp-user "$SMTP_USER"
-      bin/config set phpmailer.smtp-password "$SMTP_PASS"
-      if [[ ! -z "$SMTP_PROTO" ]]; then
-          bin/config set phpmailer.smtp-protocol "$SMTP_PROTO"
-      fi
-  fi
+#  if [[ ! -z "$SMTP_HOST" ]]; then
+#      bin/config set metamta.mail-adapter "PhabricatorMailImplementationPHPMailerAdapter"
+#      bin/config set phpmailer.mailer "smtp"
+#      bin/config set phpmailer.smtp-host "$SMTP_HOST"
+#      bin/config set phpmailer.smtp-port $SMTP_PORT
+#      bin/config set phpmailer.smtp-user "$SMTP_USER"
+#      bin/config set phpmailer.smtp-password "$SMTP_PASS"
+#      if [[ ! -z "$SMTP_PROTO" ]]; then
+#          bin/config set phpmailer.smtp-protocol "$SMTP_PROTO"
+#      fi
+  #  fi
+  bin/config set metamta.mail-adapter "PhabricatorMailImplementationPHPMailerAdapter"
+  bin/config set metamta.send-immediately false
+
   if [[ ! -z "$MTA_DOMAIN" ]]; then
       bin/config set metamta.domain "MTA_DOMAIN"
       bin/config set metamta.default-address "noreply@$MTA_DOMAIN"

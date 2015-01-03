@@ -4,7 +4,7 @@ MAINTAINER Joshua Lee <muzili@gmail.com>
 
 # Install git to download Phabricator.
 RUN yum -y install git mysql pcre-devel php-pear \
-    openssh-server cronie sudo && \
+    openssh-server cronie sudo msmtp && \
     pecl install apc && \
     yum clean all
 
