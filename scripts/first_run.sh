@@ -117,7 +117,7 @@ EOF
   cat > /etc/msmtprc <<EOF
 # The SMTP server of the provider.
 defaults
-logfile $LOG_DIR/msmtplog
+logfile $LOG_DIR/msmtp/msmtplog
 
 account mail
 host $SMTP_HOST
@@ -169,7 +169,7 @@ EOF
 
   if [[ ! -z "$MTA_DOMAIN" ]]; then
       bin/config set metamta.domain "MTA_DOMAIN"
-      bin/config set metamta.default-address "noreply@$MTA_DOMAIN"
+      bin/config set metamta.default-address "$SMTP_USER@$MTA_DOMAIN"
   fi
 
   bin/config set phabricator.timezone "Asia/Shanghai"
